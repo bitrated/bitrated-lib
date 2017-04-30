@@ -40,7 +40,8 @@ get_trade_pubkey = (trade, user) ->
 
 # Create unique hash for trade, used for HD derivation and random seed
 get_trade_hash = (trade, user) ->
-  sha256 HASH_SALT + stringify using trade, ->
+  (normalize_buff trade.chaincode) \ # use cached chaincode when available
+  or sha256 HASH_SALT + stringify using trade, ->
     normalize_contract_names trade, {
       @id, @buyer, @seller, @arbiter
       @description, @amount, @currency, @contract
