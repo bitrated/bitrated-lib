@@ -11,9 +11,10 @@ derive = require '../cryptocoin/derive'
 
 HASH_SALT = 'Bitrated-Contract;'
 
-# Conver binary BSON objects from Mongoose to standard Buffer
+# Conver Mongoose binary BSON objects or hex strings to standard Buffer
 normalize_buff = (buff) ->
-  if buff._bsontype is 'Binary' then buff.buffer
+  if typeof buff is 'string' then new Buffer buff, 'hex'
+  else if buff?._bsontype is 'Binary' then buff.buffer
   else buff
 
 # Create 2-of-3 multisig script for `trade`
@@ -40,23 +41,11 @@ get_trade_pubkey = (trade, user) ->
 # Create unique hash for trade, used for HD derivation and random seed
 get_trade_hash = (trade, user) ->
   sha256 HASH_SALT + stringify using trade, ->
-    data = {
+    normalize_contract_names trade, {
       @id, @buyer, @seller, @arbiter
       @description, @amount, @currency, @contract
       @arb_fees
     }
-    # LEGACY - fix for bug caused by the seller being invited by email.
-    # the username is still unknown when the trade was created,
-    # so the buyer used the email address
-    #
-    # Can be removed once no trades in this state exists
-    if user and trade.meta?.hash_email_fix and user.username in trade.meta.hash_email_fix_users
-      data.seller = trade.meta.hash_email_fix
-
-    # New fix for users invited by email via the normalize_contract_names utility
-    data = normalize_contract_names trade, data
-
-    data
 
 module.exports = {
   create_multisig_script, create_multisig_address
