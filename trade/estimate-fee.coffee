@@ -33,8 +33,8 @@ update_feerate = ->
       else
         # take the average of the 30 minutes fee and the 60 minutes fee (~45 min fee)
         feerate = (resp.body.halfHourFee + resp.body.hourFee) / 2
-        # restrict to +-30% of the default feerate
-        feerate = Math.min TX_EST_FEERATE*1.3, Math.max TX_EST_FEERATE*0.7, feerate
+        # restrict to +-70% of the default feerate
+        feerate = Math.min TX_EST_FEERATE*1.7, Math.max TX_EST_FEERATE*0.3, feerate
         # just in case anything went wrong...
         feerate = TX_EST_FEERATE if isNaN feerate
 
